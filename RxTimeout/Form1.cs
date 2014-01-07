@@ -3,75 +3,79 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 using Minimod.RxMessageBroker;
 
 namespace RxTimeout
 {
+
   public partial class Form1 : Form
   {
-    int _offset;
+      int _offset;
+      private Label _label;
 
     public Form1()
     {
-      InitializeComponent();
+        InitializeComponent();
 
-      RxMessageBrokerMinimod.Default.Register<Message>(Message, new ControlScheduler(this));
-      RxMessageBrokerMinimod.Default.Register<Start>(Start, TaskPoolScheduler.Default);
+        RxMessageBrokerMinimod.Default.Register<Start>(Start, TaskPoolScheduler.Default);
+
+        var displayMessageStream = Observable.Empty<Message>();
+        displayMessageStream = RxMessageBrokerMinimod.Default.Stream
+                                  .OfType<Message>()
+                                  .ObserveOn(new ControlScheduler(this))
+                                  .Do(_ =>
+                                      {
+                                          if (_label == null) return;
+                                          Controls.Remove(_label);
+                                          _label.Dispose();
+                                      })
+                                  .Do(CreateAndDisplayLabel)
+                                  .Timeout(TimeSpan.FromSeconds(5))
+                                  .ObserveOn(new ControlScheduler(this))
+                                  .Catch((Exception error) =>
+                                      {
+                                          Controls.Remove(_label);
+                                          _label.Dispose();
+                                          return displayMessageStream;
+                                      });
+        displayMessageStream.Subscribe();
+
+
+
     }
 
     void Start(Start obj)
     {
       RxMessageBrokerMinimod.Default.Send(new Message("1"));
-      // put Thread.Sleep(20) here and it works...
       RxMessageBrokerMinimod.Default.Send(new Message("2"));
       RxMessageBrokerMinimod.Default.Send(new Message("3"));
     }
 
-    void Message(Message message)
+    void CreateAndDisplayLabel(Message message)
     {
       Debug.WriteLine(DateTimeOffset.Now.Ticks + " > " + message.Value);
 
-      var label = CreateLabel();
+      _label = CreateLabel();
 
-      label.Text = message.Value;
+      _label.Text = message.Value;
 
-      label.Size = label.GetPreferredSize(Size);
-      if (label.Width < ClientRectangle.Width)
+      _label.Size = _label.GetPreferredSize(Size);
+      if (_label.Width < ClientRectangle.Width)
       {
-        label.Width += 15;
+        _label.Width += 15;
       }
-      label.Location = new Point(1, ClientRectangle.Height - label.Height - 1 - _offset);
+      _label.Location = new Point(1, ClientRectangle.Height - _label.Height - 1 - _offset);
       _offset += 15;
-      label.Visible = true;
-      Controls.Add(label);
-      Controls.SetChildIndex(label, 0);
+      _label.Visible = true;
+      Controls.Add(_label);
+      Controls.SetChildIndex(_label, 0);
 
-      RemoveOnTimeoutOrNextMessage(label);
+      //RemoveOnTimeoutOrNextMessage(label);
 
       Debug.WriteLine(DateTimeOffset.Now.Ticks + " < " + message.Value);
-    }
-
-    void RemoveOnTimeoutOrNextMessage(Control control)
-    {
-      const long ItDoesNotMatter = 42L;
-
-      var timeout = Observable.Timer(TimeSpan.FromSeconds(5));
-      var nextMessage = RxMessageBrokerMinimod.Default.Stream
-                                              .OfType<Message>()
-                                              .Select(_ => ItDoesNotMatter)
-                                              .FirstAsync();
-
-      nextMessage
-        .Amb(timeout)
-        .ObserveOn(this)
-        .Do(_ =>
-        {
-          Controls.Remove(control);
-          control.Dispose();
-        })
-        .Subscribe();
     }
 
     void button1_Click(object sender, EventArgs e)
@@ -105,5 +109,6 @@ namespace RxTimeout
     }
 
     public string Value { get; set; }
+    public Control Label { get; set; }
   }
 }
