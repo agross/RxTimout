@@ -89,6 +89,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RxApplicationContext.cs" />
+    <EmbeddedResource Include="Forms\AlexForm.resx">
+      <DependentUpon>AlexForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\MikesForm.resx">
       <DependentUpon>MikesForm.cs</DependentUpon>
     </EmbeddedResource>

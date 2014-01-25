@@ -13,13 +13,14 @@ namespace RxTimeout.Forms
   public partial class AlexForm : Form
   {
     readonly Offset _offset;
+    readonly IDisposable _subscription;
 
     public AlexForm()
     {
       InitializeComponent();
       _offset = new Offset(this);
 
-      RxMessageBrokerMinimod.Default.Register<Message>(CreateAndDisplayLabel, new ControlScheduler(this));
+      _subscription = RxMessageBrokerMinimod.Default.Register<Message>(CreateAndDisplayLabel, new ControlScheduler(this));
     }
 
     void CreateAndDisplayLabel(Message message)
@@ -28,7 +29,7 @@ namespace RxTimeout.Forms
 
       var label = Label.Create(message.Text, this);
       _offset.Apply(label);
-      
+
       RemoveOnTimeoutOrNextMessage(label);
 
       Debug.WriteLine(DateTimeOffset.Now.Ticks + " Alex< " + message.Text);
@@ -54,6 +55,11 @@ namespace RxTimeout.Forms
           control.Dispose();
         })
         .Subscribe();
+    }
+
+    void OnFormClosed(object sender, EventArgs e)
+    {
+      _subscription.Dispose();
     }
   }
 }

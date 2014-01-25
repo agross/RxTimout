@@ -13,6 +13,7 @@ namespace RxTimeout.Forms
   public partial class MikesForm : Form
   {
     readonly Offset _offset;
+    readonly IDisposable _subscription;
     System.Windows.Forms.Label _label;
 
     public MikesForm()
@@ -46,7 +47,7 @@ namespace RxTimeout.Forms
                                                      }
                                                      return displayMessageStream;
                                                    });
-      displayMessageStream.Subscribe();
+      _subscription = displayMessageStream.Subscribe();
     }
 
     void CreateAndDisplayLabel(Message message)
@@ -57,6 +58,11 @@ namespace RxTimeout.Forms
       _offset.Apply(_label);
 
       Debug.WriteLine(DateTimeOffset.Now.Ticks + " Mike< " + message.Text);
+    }
+
+    void OnFormClosed(object sender, EventArgs e)
+    {
+      _subscription.Dispose();
     }
   }
 }
