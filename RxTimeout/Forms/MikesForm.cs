@@ -45,7 +45,7 @@ namespace RxTimeout.Forms
                                                        Controls.Remove(_label);
                                                        _label.Dispose();
                                                      }
-                                                     return displayMessageStream.Skip(1);
+                                                     return displayMessageStream;
                                                    });
       _subscription = displayMessageStream.Subscribe();
     }

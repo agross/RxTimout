@@ -34,9 +34,13 @@ namespace RxTimeout
 
     void Start(Start message)
     {
+      RxMessageBrokerMinimod.Default.Send(new Message("1"));
+      RxMessageBrokerMinimod.Default.Send(new Message("2"));
+      RxMessageBrokerMinimod.Default.Send(new Message("3"));
+
       RxMessageBrokerMinimod.Default.Send(new Message("Switching to long-running action that" +
                                                       " needs to run on the main thread"));
-      Thread.Sleep(2000);
+      Thread.Sleep(1000);
       RxMessageBrokerMinimod.Default.Send(new SwitchToMainThread());
     }
 
