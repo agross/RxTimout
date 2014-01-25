@@ -85,6 +85,7 @@
     <Compile Include="Forms\Offset.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\Start.cs" />
+    <Compile Include="Messages\SwitchToMainThread.cs" />
     <Compile Include="Minimods\Minimod.RxMessageBroker.Generated.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

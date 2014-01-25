@@ -45,19 +45,19 @@ namespace RxTimeout.Forms
                                                        Controls.Remove(_label);
                                                        _label.Dispose();
                                                      }
-                                                     return displayMessageStream;
+                                                     return displayMessageStream.Skip(1);
                                                    });
       _subscription = displayMessageStream.Subscribe();
     }
 
     void CreateAndDisplayLabel(Message message)
     {
-      Debug.WriteLine(DateTimeOffset.Now.Ticks + " Mike> " + message.Text);
+      Debug.WriteLine("Mike> " + message.Text);
 
       _label = Label.Create(message.Text, this);
       _offset.Apply(_label);
 
-      Debug.WriteLine(DateTimeOffset.Now.Ticks + " Mike< " + message.Text);
+      Debug.WriteLine("Mike< " + message.Text);
     }
 
     void OnFormClosed(object sender, EventArgs e)

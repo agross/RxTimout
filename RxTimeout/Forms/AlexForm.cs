@@ -25,14 +25,14 @@ namespace RxTimeout.Forms
 
     void CreateAndDisplayLabel(Message message)
     {
-      Debug.WriteLine(DateTimeOffset.Now.Ticks + " Alex> " + message.Text);
+      Debug.WriteLine("Alex> " + message.Text);
 
       var label = Label.Create(message.Text, this);
       _offset.Apply(label);
 
       RemoveOnTimeoutOrNextMessage(label);
 
-      Debug.WriteLine(DateTimeOffset.Now.Ticks + " Alex< " + message.Text);
+      Debug.WriteLine("Alex< " + message.Text);
     }
 
     void RemoveOnTimeoutOrNextMessage(Control control)
