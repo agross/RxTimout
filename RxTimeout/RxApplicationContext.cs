@@ -3,12 +3,16 @@ using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 
+using Minimod.RxMessageBroker;
+
 using RxTimeout.Forms;
+using RxTimeout.Messages;
 
 namespace RxTimeout
 {
   class RxApplicationContext : ApplicationContext
   {
+    readonly Coordinator _coordinator;
     int _formCount;
 
     public RxApplicationContext()
@@ -23,7 +27,16 @@ namespace RxTimeout
                  };
       Show(mike);
 
-      new Coordinator().Start();
+      _coordinator = new Coordinator();
+
+      RxMessageBrokerMinimod.Default.Send(new Start());
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+      base.Dispose(disposing);
+
+      _coordinator.Dispose();
     }
 
     void Show(Form form)
